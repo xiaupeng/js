@@ -7,7 +7,7 @@ class winScene extends Phaser.Scene {
 
 preload(){
 //introImage
-// this.load.image('image', 'assets/winImage.png'); 
+this.load.image('image2', 'assets/winImage-02-02.png'); 
 
 }
 
@@ -37,16 +37,16 @@ preload(){
     );
 
     
-    // this.add.image(0, 0, 'image2').setOrigin(0, 0).setScale(2);
+    this.add.image(0, 0, 'image2').setOrigin(0, 0).setScale(0.4);
 
 
 
-      this.add.text(50,200, 'Congratulations',
-              { font: '50px VT323', fill: '#ffffff' });
-        this.add.text(50,260, 'YOU HAVE WIN',
-              { font: '50px VT323', fill: '#ffffff' });       
-        this.add.text(50,500, 'Press spacebar to replay', 
-            { font: '24px VT323', fill: '#ffffff' });
+      // this.add.text(50,200, 'Congratulations',
+      //         { font: '50px VT323', fill: '#ffffff' });
+      //   this.add.text(50,260, 'YOU HAVE WIN',
+      //         { font: '50px VT323', fill: '#ffffff' });       
+      //   this.add.text(50,500, 'Press spacebar to replay', 
+      //       { font: '24px VT323', fill: '#ffffff' });
   
 
 

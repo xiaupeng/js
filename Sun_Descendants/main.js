@@ -12,7 +12,7 @@ preload(){
  this.load.atlas('back', 'assets/HouYi-back.png','assets/HouYi-back.json'); 
  this.load.atlas('left', 'assets/HouYi-left.png','assets/HouYi-left.json'); 
 //introImage
-this.load.image('image', 'assets/introImage.png'); 
+this.load.image('image', 'assets/introImage-01.png'); 
 
 }
 
@@ -107,7 +107,7 @@ this.load.image('image', 'assets/introImage.png');
       this
     );
 
-    this.add.image(0, 0, 'image').setOrigin(0, 0).setScale(1.6);
+    this.add.image(0, 0, 'image').setOrigin(0, 0).setScale(0.4);
 
 
 
