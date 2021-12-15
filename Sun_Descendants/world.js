@@ -3,14 +3,11 @@ class world extends Phaser.Scene {
     super({
       key: "world",
     });
-
-    // Put global variable here
   }
 
   // incoming data from scene below
   init(data) {
-    this.player = data.player;
-    this.inventory = data.inventory;
+    this.playerPos = data.playerPos;
   }
 
   preload() {
@@ -27,10 +24,25 @@ class world extends Phaser.Scene {
     this.load.atlas('front', 'assets/HouYi-front.png','assets/HouYi-front.json');   
     this.load.atlas('back', 'assets/HouYi-back.png','assets/HouYi-back.json'); 
     this.load.atlas('left', 'assets/HouYi-left.png','assets/HouYi-left.json'); 
+    //sprites
+    this.load.atlas('elixir', 'assets/elixir.png','assets/elixir.json');
+   //sound
+    this.load.audio('mapBGM','assets/mapBGM.mp3');
   }
 
   create() {
     console.log("*** world scene");
+
+    this.music = this.sound
+    .add("mapBGM",{
+        loop : true,
+    })
+    .setVolume(0.2);
+    this.mapBGM = this.music;
+  
+    this.music.play();
+
+
 
     // Create the map from main
     var map = this.make.tilemap({
@@ -52,8 +64,34 @@ let tilesArray = [tileset1,tileset2,tileset3,tileset4,tileset5]
     this.groundLayer = map.createLayer("groundLayer", tilesArray, 0, 0);
     this.grassLayer = map.createLayer("grassLayer", tilesArray, 0, 0);
     this.fenceLayer = map.createLayer("fenceLayer", tilesArray, 0, 0);
+    this.connectedLayer = map.createLayer("connectedLayer", tilesArray, 0, 0);
     this.houseLayer = map.createLayer("houseLayer", tilesArray, 0, 0);
-   
+  
+
+
+    // //spritesNORMAL
+    // this.anims.create({
+    //   key: 'elixir',
+    //   frames: this.anims.generateFrameNumbers('elixir', { start: 0, end: 2 }),
+    //   frameRate: 5,
+    //   repeat: -1
+    //   });
+
+
+
+    this.anims.create({
+      key:'elixiranims', 
+      frames:[
+          { key: 'elixir', frame: 'elixir01' },
+          { key: 'elixir', frame: 'elixir02' },
+          { key: 'elixir', frame: 'elixir03' },
+      ],    
+      frameRate: 10,
+      repeat: -1
+  });
+
+
+
     this.anims.create({
       key:'right',
       frames:[
@@ -117,29 +155,85 @@ this.anims.create({
     repeat: -1
 });
 
-this.physics.world.bounds.width = this.groundLayer.width*2;
-this.physics.world.bounds.height = this.groundLayer.height*2;
+
+
+//display ICON
+this.elixir1 = this.add.sprite(30,50,"elixir").setScale(1.5).setScrollFactor(0);
+
+this.physics.world.bounds.width = this.groundLayer.width;
+this.physics.world.bounds.height = this.groundLayer.height;
+
+this.player = this.physics.add.sprite(
+  this.playerPos.x,
+  this.playerPos.y,
+  this.playerPos.dir
+).setScale(1.7)
 
 
 
-// load player into phytsics
-this.player = this.physics.add.sprite(30, 260, 'right').setScale(2)
+
+// // load player into phytsics
+// this.player = this.physics.add.sprite(30, 350, 'right').setScale(2)
 
 //enable debugging 
 window.player = this.player;
 
+
+//collectables
+this.elixir = this.physics.add
+.sprite(130,353,'elixir')
+.play("elixiranims")
+.setScale(1)
+.setSize(18,18);
+this.elixir2 = this.physics.add
+.sprite(580,859,'elixir')
+.play("elixiranims")
+.setScale(1)
+.setSize(18,18);
+
+
+
+// this.physics.add.overlap(
+//   this.player,
+//   this.enemyElixir,
+//   this.collectElixir,
+//   null,this
+// );
+
+
 this.player.setCollideWorldBounds(true); // don't go out of the this.map
 
-this.groundLayer.setCollisionByExclusion(-1, true);
+this.fenceLayer.setCollisionByExclusion(-1, true);
+this.houseLayer.setCollisionByExclusion(-1, true);
+this.grassLayer.setCollisionByExclusion(-1, true);
 
-this.physics.add.collider(this.player,this.groundLayer);
+this.physics.add.collider(this.player,this.fenceLayer);
+this.physics.add.collider(this.player,this.houseLayer);
+this.physics.add.collider(this.player,this.grassLayer);
 
+this.physics.add.overlap(this.player,this.elixir,this.collectElixir,null,this);
+this.physics.add.overlap(this.player,this.elixir1,this.collectElixir,null,this);
+this.physics.add.overlap(this.player,this.elixir2,this.collectElixir,null,this);
+this.physics.add.overlap(this.player,this.elixir3,this.collectElixir,null,this);
 
 //  Input Events
 this.cursors = this.input.keyboard.createCursorKeys();
 
 // make the camera follow the player
 this.cameras.main.startFollow(this.player);
+
+
+// this.player = this.physics.add.sprite(
+//   this.playerPos.x,
+//   this.playerPos.y,
+//   this.playerPos.dir
+// )
+
+this.elixirScore = this.add.text(55,40,'elixir:0',{
+  fontSize:'20px',
+  fill:'#ffffff'
+}).setScrollFactor(0);
+
 
 
 } // end of create //
@@ -149,79 +243,124 @@ this.cameras.main.startFollow(this.player);
 update () {
 
 if(
-    this.player.x > 415 &
-    this.player.x < 475 &
-    this.player.y > 239 &
-    this.player.y < 276 
+    this.player.x > 416 &
+    this.player.x < 480 &
+    this.player.y > 288 &
+    this.player.y < 295
 ){
     this.Room1();
 }
 
 else if(
-    this.player.x > 1102 &
-    this.player.x < 1198 &
-    this.player.y > 479 &
-    this.player.y < 536
+    this.player.x > 1107 &
+    this.player.x < 1180 &
+    this.player.y > 539 &
+    this.player.y < 547
 ){
     this.room2();
 }
 
-// else if(
-//     this.player.x > 196 &
-//     this.player.x < 250 &
-//     this.player.y > 727 &
-//     this.player.y < 740
-// ){
-//     this.room3();
-// }
-
-// else if(
-//     this.player.x > 773 &
-//     this.player.x < 830 &
-//     this.player.y > 855 &
-//     this.player.y < 868
-// ){
-//     this.room4();
-// }
-
-
-
-if (this.cursors.left.isDown) 
-{
-    this.player.setVelocityX(-200);
-    this.player.anims.play('left', true);
-} 
-else if (this.cursors.right.isDown)
-{
-    this.player.setVelocityX(200);
-    this.player.anims.play('right', true);
+else if(
+    this.player.x > 101 &
+    this.player.x < 204 &
+    this.player.y > 1046 &
+    this.player.y < 1060
+){
+    this.room3();
 }
-else if (this.cursors.up.isDown)
-{
-    this.player.setVelocityY(-200);
-    this.player.anims.play('back', true);
+
+else if(
+    this.player.x > 1146 &
+    this.player.x < 1176 &
+    this.player.y > 1065
+){
+    this.room4();
 }
-else if (this.cursors.down.isDown)
-{
-    this.player.setVelocityY(200);
-    this.player.anims.play('front', true);
-} else {
-    this.player.setVelocity(0);
-}
+
+
+
+if (this.cursors.left.isDown) {
+    this.player.body.setVelocityX(-200);
+    this.player.anims.play("left", true);
+  } else if (this.cursors.right.isDown) {
+    this.player.body.setVelocityX(200);
+    this.player.anims.play("right", true);
+  } else if (this.cursors.up.isDown) {
+    this.player.body.setVelocityY(-200);
+    this.player.anims.play("back", true);
+    //console.log('up');
+  } else if (this.cursors.down.isDown) {
+    this.player.body.setVelocityY(200);
+    this.player.anims.play("front", true);
+    //console.log('down');
+  } else {
+    this.player.anims.stop();
+    this.player.body.setVelocity(0, 0);
+  }
 
 } // end of update //
+
+
+// function to collect elixir
+collectElixir(player,elixir){
+  console.log("collectElixir");
+elixir.disableBody(true,true);
+  // this.popsnd.play();
+ window.elixir = window.elixir + 1;
+ this.elixirScore.setText('elixir: ' + window.elixir)
+    console.log("elixir", window.elixir);
+    
+ }
 
 
 //function jump to room1
 Room1(player, title){
     console.log("Room1 function");
-    this.scene.start('room1')
+      let playerPos = {};
+      playerPos.x = 325;
+      playerPos.y = 493;
+      playerPos.dir = "back";
+      this.mapBGM.loop = false;
+      this.mapBGM.stop();
+      this.scene.start("room1",{ playerPos: playerPos });
+  }
+
+  room2(player, title){
+    console.log("room2 function");
+    let playerPos = {};
+    playerPos.x = 325;
+    playerPos.y = 496;
+    playerPos.dir = "back";
+    this.mapBGM.loop = false;
+    this.mapBGM.stop();
+    this.scene.start('room2',{ playerPos: playerPos });
 }
 
-room2(player, title){
-    console.log("room2 function");
-    this.scene.start('room2')
+room3(player, title){
+  console.log("room3 function");
+  let playerPos = {};
+  playerPos.x = 325;
+  playerPos.y = 496;
+  playerPos.dir = "back";
+  this.mapBGM.loop = false;
+    this.mapBGM.stop();
+  this.scene.start('room3',{ playerPos: playerPos });
 }
+
+room4(player, title){
+  console.log("room3 function");
+  let playerPos = {};
+  playerPos.x = 320;
+  playerPos.y = 526;
+  playerPos.dir = "back";
+  this.mapBGM.loop = false;
+    this.mapBGM.stop();
+  this.scene.start('room4',{ playerPos: playerPos });
+}
+
+
+}//end
+
 
 // room3(player, title){
 //     console.log("room3 function");
@@ -231,5 +370,4 @@ room2(player, title){
 //     console.log("room4 function");
 // }
 
- 
-}
+
